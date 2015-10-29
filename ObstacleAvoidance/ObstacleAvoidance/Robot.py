@@ -7,7 +7,7 @@ Created on Oct 29, 2015
 import RPi.GPIO as GPIO
 import time
 from string import atoi,atof
-import sys,termios
+import sys,tty,termios
 
 class Robot(object):
     '''
@@ -71,7 +71,16 @@ class Robot(object):
         print "Obstacle distance at Right ",self.Measure()," cm"
         self.turnLeft()
     
-    def 
+    def getch(self):
+        fd=sys.stdin.fileno()
+        old_settings=termios.tcgetattr(fd)
+        try:
+            tty.setraw(sys.stdin.fileno())
+            ch = sys.stdin.read(1)
+        finally:
+            termios.tcsetattr(fd,termios,TCSADRAIN, old_settings)
+        self.ch=ch
+        return self.ch
         
     
         
