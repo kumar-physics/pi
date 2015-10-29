@@ -7,7 +7,7 @@ Created on Oct 29, 2015
 import RPi.GPIO as GPIO
 import time
 from string import atoi,atof
-import sys
+import sys,termios
 
 class Robot(object):
     '''
@@ -70,6 +70,8 @@ class Robot(object):
         self.turnLeft()
         print "Obstacle distance at Right ",self.Measure()," cm"
         self.turnLeft()
+    
+    def 
         
     
         
