@@ -74,14 +74,15 @@ class Robot(object):
     
         
 if __name__=="__main__":
-    tr=atoi(sys.argv[1])
-    ec=atoi(sys.argv[2])
-    lm1=atoi(sys.argv[3])
-    lm2=atoi(sys.argv[4])
-    rm1=atoi(sys.argv[5])
-    rm2=atoi(sys.argv[6])
-    t=atof(sys.argv[7])
-    p=Robot(tr,ec,lm1,lm2,rm1,rm2,t)
+    #tr=atoi(sys.argv[1])
+    #ec=atoi(sys.argv[2])
+    #lm1=atoi(sys.argv[3])
+    #lm2=atoi(sys.argv[4])
+    #rm1=atoi(sys.argv[5])
+    #rm2=atoi(sys.argv[6])
+    #t=atof(sys.argv[7])
+    #p=Robot(tr,ec,lm1,lm2,rm1,rm2,t)
+    p=(16,18,35,36,37,38,1.0)
     p.start()
     GPIO.cleanup()
     
