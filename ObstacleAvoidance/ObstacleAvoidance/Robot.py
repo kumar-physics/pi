@@ -33,6 +33,14 @@ class EchoSensor(object):
         return self.distance
     
     
+    def avgDistance(self,trails):
+        self.avgdist=0.0
+        for i in range(trails):
+            self.avgdist+=self.measure()
+        return self.avgdist/trails
+    
+    
+        
     
 class Motor(object):
     
@@ -74,13 +82,41 @@ class Robot(object):
         self.engine.stop()
     
     def start(self):
+        tt1=time.time()
         print "Obstacle distance at Front",self.sensorFront.measure()," cm"
+        print tt2=time.time()
+        print "Time delay",tt2-tt1
+        tt1=time.time()
+        print "Obstacle distance at Front",self.sensorFront.avgDistance(5)," cm"
+        tt2=time.time()
+        print print "Time delay",tt2-tt1
         self.engine.turnLeft()
-        print "Obstacle distance at Left ",self.sensorFront.measure()," cm"
+        ptt1=time.time()
+        print "Obstacle distance at Front",self.sensorFront.measure()," cm"
+        print tt2=time.time()
+        print "Time delay",tt2-tt1
+        tt1=time.time()
+        print "Obstacle distance at Front",self.sensorFront.avgDistance(5)," cm"
+        tt2=time.time()
+        print print "Time delay",tt2-tt1
         self.engine.turnLeft()
-        print "Obstacle distance at Back ",self.sensorFront.measure()," cm"
+        tt1=time.time()
+        print "Obstacle distance at Front",self.sensorFront.measure()," cm"
+        print tt2=time.time()
+        print "Time delay",tt2-tt1
+        tt1=time.time()
+        print "Obstacle distance at Front",self.sensorFront.avgDistance(5)," cm"
+        tt2=time.time()
+        print print "Time delay",tt2-tt1
         self.engine.turnLeft()
-        print "Obstacle distance at Right ",self.sensorFront.measure()," cm"
+        tt1=time.time()
+        print "Obstacle distance at Front",self.sensorFront.measure()," cm"
+        print tt2=time.time()
+        print "Time delay",tt2-tt1
+        tt1=time.time()
+        print "Obstacle distance at Front",self.sensorFront.avgDistance(5)," cm"
+        tt2=time.time()
+        print print "Time delay",tt2-tt1
         self.engine.turnLeft()
         
     def stop(self):
