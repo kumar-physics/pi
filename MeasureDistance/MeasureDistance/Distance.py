@@ -22,7 +22,7 @@ class Distance:
         self.trigger = trigger
         self.echo = echo
         GPIO.setmode(GPIO.BOARD)
-        GPIO.setup(self.trigger,GPIO.OUT,pull_up_down = GPIO.PUD_DOWN)
+        GPIO.setup(self.trigger,GPIO.OUT)
         GPIO.setup(self.echo,GPIO.IN,pull_up_down = GPIO.PUD_DOWN)
         time.sleep(0.5)
 
@@ -40,13 +40,16 @@ class Distance:
         return self.distance
     
     def MeasureEvent(self):
-        GPIO.add_event_detect(self.trigger,GPIO.RISING)
+        #GPIO.add_event_detect(self.trigger,GPIO.RISING)
         GPIO.add_event_detect(self.echo,GPIO.RISING)
-        GPIO.add_event_callback(self.trigger,self.measureTime)
+        #GPIO.add_event_callback(self.trigger,self.measureTime)
         GPIO.add_event_callback(self.echo,self.measureTime)
         GPIO.output(self.trigger,True)
         time.sleep(0.00001)
         GPIO.output(self.trigger,False)
+	self.startTime=time.time()
+        while GPIO.input(self.echo) == False:
+            self.startTime = time.time()
         self.elapsedTime=self.stopTime-self.startTime
         self.distance=(self.elapsedTime*34000.0)/2.0
         return self.distance
@@ -71,6 +74,8 @@ if __name__=="__main__":
     e=atoi(sys.argv[2])
     p=Distance(t,e)
     for i in range(100):
+	time.sleep(0.5)
         print p.Measure()
-        print p.MeasureEvent()
+	#time.sleep(0.5)
+        #print p.MeasureEvent()
     

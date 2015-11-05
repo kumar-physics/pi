@@ -15,11 +15,13 @@ class EchoSensor(object):
     def __init__(self,trigger,echo):
         self.trigger = trigger
         self.echo = echo
-        GPIO.setup(self.trigger,GPIO.OUT,pull_up_down = GPIO.PUD_DOWN)
+        GPIO.setup(self.trigger,GPIO.OUT)
         GPIO.setup(self.echo,GPIO.IN,pull_up_down = GPIO.PUD_DOWN)
         time.sleep(0.5)
         
     def measure(self):
+	GPIO.output(self.trigger,0)
+	GPIO.input(self.echo,pull_up_down = GPIO.PUD_DOWN)
         GPIO.output(self.trigger,True)
         time.sleep(0.00001)
         GPIO.output(self.trigger,False)
@@ -34,10 +36,11 @@ class EchoSensor(object):
     
     
     def avgDistance(self,trails):
-        self.avgdist=0.0
+        avgdist=0.0
         for i in range(trails):
-            self.avgdist+=self.measure()
-        return self.avgdist/trails
+            avgdist+=self.measure()
+	    time.sleep(0.5)
+        return avgdist/trails
     
     
         
@@ -49,7 +52,7 @@ class Motor(object):
         self.leftMotor=[lm1,lm2]
         self.rightMotor=[rm1,rm2]
         self.motors=self.leftMotor+self.rightMotor
-        GPIO.setup(self.motors,GPIO.OUT,pull_up_down = GPIO.PUD_DOWN)
+        GPIO.setup(self.motors,GPIO.OUT)
         
     def stop(self):
         GPIO.output(self.motors,0)
@@ -77,46 +80,49 @@ class Robot(object):
 
     def __init__(self, tf,ef,lm1,lm2,rm1,rm2,t):
         GPIO.setmode(GPIO.BOARD)
+	print "GPIO set as BOARD"
         self.sensorFront=EchoSensor(tf,ef)
+	print "Sensor activated"
         self.engine=Motor(lm1,lm2,rm1,rm2,t)
-        self.engine.stop()
+	print "Motor activated"
     
     def start(self):
+	print "Comes here"
         tt1=time.time()
         print "Obstacle distance at Front",self.sensorFront.measure()," cm"
-        print tt2=time.time()
+        tt2=time.time()
         print "Time delay",tt2-tt1
         tt1=time.time()
         print "Obstacle distance at Front",self.sensorFront.avgDistance(5)," cm"
         tt2=time.time()
-        print print "Time delay",tt2-tt1
+        print "Time delay",tt2-tt1
         self.engine.turnLeft()
         ptt1=time.time()
         print "Obstacle distance at Front",self.sensorFront.measure()," cm"
-        print tt2=time.time()
+        tt2=time.time()
         print "Time delay",tt2-tt1
         tt1=time.time()
         print "Obstacle distance at Front",self.sensorFront.avgDistance(5)," cm"
         tt2=time.time()
-        print print "Time delay",tt2-tt1
+        print "Time delay",tt2-tt1
         self.engine.turnLeft()
         tt1=time.time()
         print "Obstacle distance at Front",self.sensorFront.measure()," cm"
-        print tt2=time.time()
+        tt2=time.time()
         print "Time delay",tt2-tt1
         tt1=time.time()
         print "Obstacle distance at Front",self.sensorFront.avgDistance(5)," cm"
         tt2=time.time()
-        print print "Time delay",tt2-tt1
+        print "Time delay",tt2-tt1
         self.engine.turnLeft()
         tt1=time.time()
         print "Obstacle distance at Front",self.sensorFront.measure()," cm"
-        print tt2=time.time()
+        tt2=time.time()
         print "Time delay",tt2-tt1
         tt1=time.time()
         print "Obstacle distance at Front",self.sensorFront.avgDistance(5)," cm"
         tt2=time.time()
-        print print "Time delay",tt2-tt1
+        print "Time delay",tt2-tt1
         self.engine.turnLeft()
         
     def stop(self):
