@@ -20,8 +20,8 @@ class EchoSensor(object):
         time.sleep(0.5)
         
     def measure(self):
-	GPIO.output(self.trigger,0)
-	GPIO.input(self.echo,pull_up_down = GPIO.PUD_DOWN)
+        GPIO.output(self.trigger,0)
+        GPIO.input(self.echo,pull_up_down = GPIO.PUD_DOWN)
         GPIO.output(self.trigger,True)
         time.sleep(0.00001)
         GPIO.output(self.trigger,False)
@@ -36,11 +36,11 @@ class EchoSensor(object):
     
     
     def avgDistance(self,trails):
-        avgdist=0.0
+        self.avgdist=0.0
         for i in range(trails):
-            avgdist+=self.measure()
-	    time.sleep(0.5)
-        return avgdist/trails
+            time.sleep(0.1)
+            self.avgdist+=self.measure()
+        return self.avgdist/trails
     
     
         
@@ -55,21 +55,26 @@ class Motor(object):
         GPIO.setup(self.motors,GPIO.OUT)
         
     def stop(self):
+        print "Stopping engine"
         GPIO.output(self.motors,0)
         
     def moveForward(self):
+        print "Moving forward"
         GPIO.output(self.motors,(1,0,1,0))
         
     def moveBackward(self):
+        print "Moving backward"
         GPIO.output(self.motors,(0,1,0,1))
         
     def turnRight(self):
+        print "Turning right"
         self.stop()
         GPIO.output(self.motors,(1,0,0,1))
         time.sleep(self.turnDelay)
         self.stop()
         
     def turnLeft(self):
+        print "Turning left"
         self.stop()
         GPIO.output(self.motors,(0,1,1,0))
         time.sleep(self.turnDelay)
@@ -80,52 +85,26 @@ class Robot(object):
 
     def __init__(self, tf,ef,lm1,lm2,rm1,rm2,t):
         GPIO.setmode(GPIO.BOARD)
-	print "GPIO set as BOARD"
+        print "GPIO mode set as BOARD"
         self.sensorFront=EchoSensor(tf,ef)
-	print "Sensor activated"
+        print "Front sensor configured (trigger pin %d,echo pin %d)"%(tr,ef)
         self.engine=Motor(lm1,lm2,rm1,rm2,t)
-	print "Motor activated"
+        print "Engine configured left motor pins=%d,%d right motor pins=%d,%d and turn delay=%f s"%(lm1,lm2,rm1,rm2,t)
     
     def start(self):
-	print "Comes here"
-        tt1=time.time()
-        print "Obstacle distance at Front",self.sensorFront.measure()," cm"
-        tt2=time.time()
-        print "Time delay",tt2-tt1
-        tt1=time.time()
-        print "Obstacle distance at Front",self.sensorFront.avgDistance(5)," cm"
-        tt2=time.time()
-        print "Time delay",tt2-tt1
+        print "Measuring distance"
+        print "Distance front= %f cm"%(self.sensorFront.measure())
         self.engine.turnLeft()
-        ptt1=time.time()
-        print "Obstacle distance at Front",self.sensorFront.measure()," cm"
-        tt2=time.time()
-        print "Time delay",tt2-tt1
-        tt1=time.time()
-        print "Obstacle distance at Front",self.sensorFront.avgDistance(5)," cm"
-        tt2=time.time()
-        print "Time delay",tt2-tt1
+        print "Distance left= %f cm"%(self.sensorFront.measure())
         self.engine.turnLeft()
-        tt1=time.time()
-        print "Obstacle distance at Front",self.sensorFront.measure()," cm"
-        tt2=time.time()
-        print "Time delay",tt2-tt1
-        tt1=time.time()
-        print "Obstacle distance at Front",self.sensorFront.avgDistance(5)," cm"
-        tt2=time.time()
-        print "Time delay",tt2-tt1
+        print "Distance back= %f cm"%(self.sensorFront.measure())
         self.engine.turnLeft()
-        tt1=time.time()
-        print "Obstacle distance at Front",self.sensorFront.measure()," cm"
-        tt2=time.time()
-        print "Time delay",tt2-tt1
-        tt1=time.time()
-        print "Obstacle distance at Front",self.sensorFront.avgDistance(5)," cm"
-        tt2=time.time()
-        print "Time delay",tt2-tt1
+        print "Distance right= %f cm"%(self.sensorFront.measure())
         self.engine.turnLeft()
         
+        
     def stop(self):
+        print "Engine off and terminating program"
         self.engine.stop()
         GPIO.cleanup()
         
@@ -139,6 +118,30 @@ class Robot(object):
             termios.tcsetattr(fd,termios,TCSADRAIN, old_settings)
         self.ch=ch
         return self.ch
+    
+    def interactive(self):
+        self.ch="n"
+        while True:
+            print "l-left,r-right,f-forward,b-backward,s-stop,e-exit"
+            self.ch=self.getch()
+            if self.ch=="l":
+                self.engine.turnLeft()
+            elif self.ch=="r":
+                self.engine.turnRight()
+            elif self.ch=="f":
+                self.engine.moveForward()
+            elif self.ch=="b":
+                self.engine.moveBackward()
+            elif self.ch=='s':
+                self.engine.stop()
+            elif self.ch=="e":
+                print "bye.. exiting "
+                self.stop()
+                exit(0)
+            else:
+                print "Not a valid input",self.ch
+            
+        
         
     
         
@@ -153,5 +156,6 @@ if __name__=="__main__":
     #p=Robot(tr,ec,lm1,lm2,rm1,rm2,t)
     robot=Robot(16,18,35,36,37,38,1.0)
     robot.start()
+    robot.interactive()
     robot.stop()
     
