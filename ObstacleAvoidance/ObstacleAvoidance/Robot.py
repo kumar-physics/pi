@@ -1,5 +1,16 @@
 '''
 Created on Oct 29, 2015
+3.3V pin : 1,17
+5V pin : 2,4
+Ground : 6,9,14,20,25,30,34,39
+EPROM : 27,28
+GPIO : 3,5,7,8,10,11,12,13,15,16,18,10,21,22,23,24,26,29,31,32,33,35,36,37,38,40
+
+Motor Control : 29,31,33,35
+front 7,8
+left 11,12
+right 15,16
+back 21,22
 
 @author: kbaskaran
 '''
@@ -83,10 +94,13 @@ class Motor(object):
     
 class Robot(object):
 
-    def __init__(self, tf,ef,lm1,lm2,rm1,rm2,t):
+    def __init__(self, tf,ef,tl,el,tr,er,tb,eb,lm1,lm2,rm1,rm2,t):
         GPIO.setmode(GPIO.BOARD)
         print "GPIO mode set as BOARD"
         self.sensorFront=EchoSensor(tf,ef)
+        self.sensorLeft=EchoSensor(tf,el)
+        self.sensorRight=EchoSensor(tr,er)
+        self.sensorBack=EchoSensor(tb,eb)
         print "Front sensor configured (trigger pin %d,echo pin %d)"%(tr,ef)
         self.engine=Motor(lm1,lm2,rm1,rm2,t)
         print "Engine configured left motor pins=%d,%d right motor pins=%d,%d and turn delay=%f s"%(lm1,lm2,rm1,rm2,t)
@@ -101,6 +115,16 @@ class Robot(object):
         self.engine.turnLeft()
         print "Distance right= %f cm"%(self.sensorFront.measure())
         self.engine.turnLeft()
+    
+    
+    def checkSurrounding(self):
+        self.surrounding=[self.sensorFront.measure(),self.sensorLeft.measure(),self.sensorRight.measure(),self.sensorBack.measure()]
+    def escape(self):
+        self.checkSurrounding()
+        print self.surrounding
+        print "Escaping mode activated"
+
+        
         
         
     def stop(self):
@@ -154,7 +178,7 @@ if __name__=="__main__":
     #rm2=atoi(sys.argv[6])
     #t=atof(sys.argv[7])
     #p=Robot(tr,ec,lm1,lm2,rm1,rm2,t)
-    robot=Robot(16,18,35,36,37,38,1.0)
+    robot=Robot(7,8,11,12,15,16,21,22,29,31,33,35,1.0)
     robot.start()
     robot.interactive()
     robot.stop()
