@@ -32,7 +32,7 @@ class EchoSensor(object):
         
     def measure(self):
         GPIO.output(self.trigger,0)
-        GPIO.input(self.echo,pull_up_down = GPIO.PUD_DOWN)
+        #GPIO.input(self.echo,pull_up_down = GPIO.PUD_DOWN)
         GPIO.output(self.trigger,True)
         time.sleep(0.00001)
         GPIO.output(self.trigger,False)
@@ -80,16 +80,16 @@ class Motor(object):
     def turnRight(self):
         print "Turning right"
         self.stop()
-        GPIO.output(self.motors,(1,0,0,1))
+        GPIO.output(self.motors,(1,1,0,0))
         time.sleep(self.turnDelay)
         self.stop()
         
     def turnLeft(self):
         print "Turning left"
-        self.stop()
-        GPIO.output(self.motors,(0,1,1,0))
+        #self.stop()
+        GPIO.output(self.motors,(0,0,1,1))
         time.sleep(self.turnDelay)
-        self.stop()
+        self.moveForward()
     
     
 class Robot(object):
@@ -98,23 +98,42 @@ class Robot(object):
         GPIO.setmode(GPIO.BOARD)
         print "GPIO mode set as BOARD"
         self.sensorFront=EchoSensor(tf,ef)
-        self.sensorLeft=EchoSensor(tf,el)
+        self.sensorLeft=EchoSensor(tl,el)
         self.sensorRight=EchoSensor(tr,er)
         self.sensorBack=EchoSensor(tb,eb)
         print "Front sensor configured (trigger pin %d,echo pin %d)"%(tr,ef)
         self.engine=Motor(lm1,lm2,rm1,rm2,t)
         print "Engine configured left motor pins=%d,%d right motor pins=%d,%d and turn delay=%f s"%(lm1,lm2,rm1,rm2,t)
-    
+	
+    def test(self):
+	self.engine.moveForward()
+	self.allBlocked=False
+	while self.allBlocked==False:
+		if self.sensorBack.measure()<25.0:
+			self.engine.turnLeft()
+			if self.sensorBack.measure()<25.0:
+				self.engine.turnLeft()
+				if self.sensorBack.measure()<25.0:
+					self.engine.turnLeft()
+					if self.sensorBack.measure()<25.0:
+						self.allBlocked=True
+		
+	self.engine.stop()
+			    
+
     def start(self):
         print "Measuring distance"
         print "Distance front= %f cm"%(self.sensorFront.measure())
-        self.engine.turnLeft()
-        print "Distance left= %f cm"%(self.sensorFront.measure())
-        self.engine.turnLeft()
-        print "Distance back= %f cm"%(self.sensorFront.measure())
-        self.engine.turnLeft()
-        print "Distance right= %f cm"%(self.sensorFront.measure())
-        self.engine.turnLeft()
+        #self.engine.turnLeft()
+	time.sleep(0.1)
+        print "Distance left= %f cm"%(self.sensorLeft.measure())
+        #self.engine.turnLeft()
+	time.sleep(0.1)
+        print "Distance back= %f cm"%(self.sensorRight.measure())
+        #self.engine.turnLeft()
+	time.sleep(0.1)
+        print "Distance right= %f cm"%(self.sensorBack.measure())
+        #self.engine.turnLeft()
     
     
     def checkSurrounding(self):
@@ -178,8 +197,9 @@ if __name__=="__main__":
     #rm2=atoi(sys.argv[6])
     #t=atof(sys.argv[7])
     #p=Robot(tr,ec,lm1,lm2,rm1,rm2,t)
+    #GPIO.cleanup()
     robot=Robot(7,8,11,12,15,16,21,22,29,31,33,35,1.0)
-    robot.start()
-    robot.interactive()
+    robot.test()
+    #robot.interactive()
     robot.stop()
     
