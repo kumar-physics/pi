@@ -119,10 +119,12 @@ class Robot(object):
     
     def checkSurrounding(self):
         self.surrounding=[self.sensorFront.measure(),self.sensorLeft.measure(),self.sensorRight.measure(),self.sensorBack.measure()]
-    def escape(self):
-        self.checkSurrounding()
-        print self.surrounding
-        print "Escaping mode activated"
+    def escape(self,cutoff):
+        self.cutoff=cutoff
+        while (self.surrounding[0]<self.cutoff):
+            self.checkSurrounding()
+            print self.surrounding
+            print "Escaping mode activated"
 
         
         
