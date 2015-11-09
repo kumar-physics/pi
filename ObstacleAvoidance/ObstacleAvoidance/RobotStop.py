@@ -86,10 +86,10 @@ class Motor(object):
         
     def turnLeft(self):
         print "Turning left"
-        #self.stop()
+        self.stop()
         GPIO.output(self.motors,(0,0,1,1))
         time.sleep(self.turnDelay)
-        self.moveForward()
+        self.stop()
     
     
 class Robot(object):
@@ -110,7 +110,7 @@ class Robot(object):
 	self.allBlocked=False
 	while self.allBlocked==False:
 		if self.sensorBack.measure()<25.0:
-			self.engine.turnLeft()
+			self.engine.trunLeft()
 			if self.sensorBack.measure()<25.0:
 				self.engine.turnLeft()
 				if self.sensorBack.measure()<25.0:
@@ -138,12 +138,10 @@ class Robot(object):
     
     def checkSurrounding(self):
         self.surrounding=[self.sensorFront.measure(),self.sensorLeft.measure(),self.sensorRight.measure(),self.sensorBack.measure()]
-    def escape(self,cutoff):
-        self.cutoff=cutoff
-        while (self.surrounding[0]<self.cutoff):
-            self.checkSurrounding()
-            print self.surrounding
-            print "Escaping mode activated"
+    def escape(self):
+        self.checkSurrounding()
+        print self.surrounding
+        print "Escaping mode activated"
 
         
         
@@ -201,7 +199,7 @@ if __name__=="__main__":
     #p=Robot(tr,ec,lm1,lm2,rm1,rm2,t)
     #GPIO.cleanup()
     robot=Robot(7,8,11,12,15,16,21,22,29,31,33,35,1.0)
-    robot.test()
+   # robot.test()
     #robot.interactive()
     robot.stop()
     
