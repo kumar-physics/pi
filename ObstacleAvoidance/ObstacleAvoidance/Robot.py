@@ -11,6 +11,9 @@ front 7,8
 left 11,12
 right 15,16
 back 21,22
+top 23,24
+signal 26
+sigt 10
 
 @author: kbaskaran
 '''
@@ -86,40 +89,71 @@ class Motor(object):
         
     def turnLeft(self):
         print "Turning left"
-        #self.stop()
+        self.stop()
         GPIO.output(self.motors,(0,0,1,1))
         time.sleep(self.turnDelay)
-        self.moveForward()
+        self.stop()
+        #self.moveForward()
     
     
 class Robot(object):
 
-    def __init__(self, tf,ef,tl,el,tr,er,tb,eb,lm1,lm2,rm1,rm2,t):
+    def __init__(self, tf,ef,tl,el,tr,er,tb,eb,tt,et,lm1,lm2,rm1,rm2,t):
         GPIO.setmode(GPIO.BOARD)
         print "GPIO mode set as BOARD"
         self.sensorFront=EchoSensor(tf,ef)
         self.sensorLeft=EchoSensor(tl,el)
         self.sensorRight=EchoSensor(tr,er)
         self.sensorBack=EchoSensor(tb,eb)
+        self.sensorTop=EchoSensor(tt,et)
         print "Front sensor configured (trigger pin %d,echo pin %d)"%(tr,ef)
         self.engine=Motor(lm1,lm2,rm1,rm2,t)
         print "Engine configured left motor pins=%d,%d right motor pins=%d,%d and turn delay=%f s"%(lm1,lm2,rm1,rm2,t)
-	
+        self.sigOut=sigo
+        self.sigIn=sigi
     def test(self):
-	self.engine.moveForward()
-	self.allBlocked=False
-	while self.allBlocked==False:
-		if self.sensorBack.measure()<25.0:
-			self.engine.turnLeft()
-			if self.sensorBack.measure()<25.0:
-				self.engine.turnLeft()
-				if self.sensorBack.measure()<25.0:
-					self.engine.turnLeft()
-					if self.sensorBack.measure()<25.0:
-						self.allBlocked=True
+        self.engine.moveForward()
+        self.allBlocked=False
+        while self.allBlocked==False:
+            if self.sensorTop.measure()<10:
+                self.allBlocked=True
+            else:
+                if self.sensorBack.measure()<25.0:
+                    self.engine.turnLeft()
+                    if self.sensorBack.measure()<25.0:
+                        self.engine.turnLeft()
+                        if self.sensorBack.measure()<25.0:
+                            self.engine.turnLeft()
+                            if self.sensorBack.measure()<25.0:
+                                self.allBlocked=True
 		
 	self.engine.stop()
-			    
+	
+    
+    def go(self):
+        self.blocked=False
+        self.blockcount=0
+        while self.blocked==False:
+            self.checkSurrounding()
+            if self.surrounding[-1]<10.0:
+                self.blocked=True
+            else:
+                if (self.surrounding[0]<25.0 and (self.surrounding[1]>self.surrounding[2])):
+                    self.engine.turnLeft()
+                    self.checkSurrounding()
+                    self.blockcount+=1
+                else:
+                    self.engine.turnRight()
+                    self.checkSurrounding()
+                    self.blockcount+=1
+                if (self.surrounding[0]>=25.0):
+                    self.engine.moveForward()
+                    self.blockcount=0
+                if self.blockcount>4:
+                    self.blocked=True
+        self.engine.stop()
+                    
+                		    
 
     def start(self):
         print "Measuring distance"
@@ -137,7 +171,7 @@ class Robot(object):
     
     
     def checkSurrounding(self):
-        self.surrounding=[self.sensorFront.measure(),self.sensorLeft.measure(),self.sensorRight.measure(),self.sensorBack.measure()]
+        self.surrounding=[self.sensorFront.measure(),self.sensorLeft.measure(),self.sensorRight.measure(),self.sensorBack.measure(),self.sensorTop.measure()]
     def escape(self,cutoff):
         self.cutoff=cutoff
         while (self.surrounding[0]<self.cutoff):
@@ -147,6 +181,10 @@ class Robot(object):
 
         
         
+    def haltRobot(self):
+        print "Got the halt signal"
+        GPIO.remove_event_detect(self.signal)
+        self.stop()
         
     def stop(self):
         print "Engine off and terminating program"
@@ -200,7 +238,7 @@ if __name__=="__main__":
     #t=atof(sys.argv[7])
     #p=Robot(tr,ec,lm1,lm2,rm1,rm2,t)
     #GPIO.cleanup()
-    robot=Robot(7,8,11,12,15,16,21,22,29,31,33,35,1.0)
+    robot=Robot(7,8,11,12,15,16,21,22,23,2429,31,33,35,1.0)
     robot.test()
     #robot.interactive()
     robot.stop()
