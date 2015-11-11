@@ -100,7 +100,7 @@ class Motor(object):
     
 class Robot(object):
 
-    def __init__(self, tf,ef,tl,el,tr,er,tb,eb,tt,et,lm1,lm2,rm1,rm2,t):
+    def __init__(self, tf,ef,tl,el,tr,er,tb,eb,tt,et,lm1,lm2,rm1,rm2,t,dc):
         GPIO.setmode(GPIO.BOARD)
         print "GPIO mode set as BOARD"
         self.sensorFront=EchoSensor(tf,ef)
@@ -108,6 +108,7 @@ class Robot(object):
         self.sensorRight=EchoSensor(tr,er)
         self.sensorBack=EchoSensor(tb,eb)
         self.sensorTop=EchoSensor(tt,et)
+        self.distanceCutoff=dc
         #print "Front sensor configured (trigger pin %d,echo pin %d)"%(tr,ef)
         self.engine=Motor(lm1,lm2,rm1,rm2,t)
         print "Engine configured left motor pins=%d,%d right motor pins=%d,%d and turn delay=%f s"%(lm1,lm2,rm1,rm2,t)
@@ -118,77 +119,79 @@ class Robot(object):
             if self.sensorTop.measure()<10:
                 self.allBlocked=True
             else:
-                if self.sensorBack.measure()<25.0:
+                if self.sensorBack.measure()<self.distanceCutoff:
                     self.engine.turnLeft()
-                    if self.sensorBack.measure()<25.0:
+                    if self.sensorBack.measure()<self.distanceCutoff:
                         self.engine.turnLeft()
-                        if self.sensorBack.measure()<25.0:
+                        if self.sensorBack.measure()<self.distanceCutoff:
                             self.engine.turnLeft()
-                            if self.sensorBack.measure()<25.0:
+                            if self.sensorBack.measure()<self.distanceCutoff:
                                 self.allBlocked=True
 		
 	self.engine.stop()
 	
     
+    def measure(self):
+        self.sensorFront.measure()
+        self.sensorLeft.measure()
+        self.sensorRight.measure()
+        self.sensorBack.measure()
+        self.sensorTop.measure()
+    
     def go(self):
         self.blocked=False
-        self.blockcount=0
         while self.blocked==False:
-            self.checkSurrounding()
-	    print self.surrounding
-            if self.surrounding[-1]<10.0:
-                self.blocked=True
-            else:
-                if (self.surrounding[0]<25.0 and (self.surrounding[1]>self.surrounding[2])):
-                    self.engine.turnLeft()
-                    self.checkSurrounding()
-                    self.blockcount+=1
-                elif (self.surrounding[0]<25.0 and (self.surrounding[1]<self.surrounding[2])):
-                    self.engine.turnRight()
-                    self.checkSurrounding()
-                    self.blockcount+=1
-		else:
-                #if (self.surrounding[0]>=25.0):
+            time.sleep(0.1)
+            self.measure()
+            if self.sensorTop.distance<10.0: self.blocked=True
+            if ((self.sensorFront.distance<self.distanceCutoff and self.engine.motors==(1,0,1,0))or (self.sensorBack.distance<self.distanceCutoff and self.engine.motors==(0,1,0,1))):
+                #self.engine.stop()
+                if (self.sensorLeft.distance<self.distanceCutoff and self.sensorRight.distance<self.distanceCutoff and self.sensorBack.distance<self.distanceCutoff and self.engine.motors==(1,0,1,0)):
+                    self.engine.stop()
+                elif (self.sensorLeft.distance<self.distanceCutoff and self.sensorRight.distance<self.distanceCutoff and self.sensorFront.distance<self.distanceCutoff and self.engine.motors==(0,1,0,1)):
+                    self.engine.stop()
+                elif (self.sensorLeft.distance<self.distanceCutoff and self.sensorRight.distance<self.distanceCutoff and self.sensorBack.distance>self.distanceCutoff):
+                    self.engine.moveBackward()
+                elif (self.sensorLeft.distance<self.distanceCutoff and self.sensorRight.distance<self.distanceCutoff and self.sensorFront.distance>self.distanceCutoff):
                     self.engine.moveForward()
-                    self.blockcount=0
-                if self.blockcount>4:
+                elif (self.sensorLeft.distance>self.sensorRight.distance):
+                    self.engine.turnLeft()
+                    self.engine.moveForward()
+                elif (self.sensorLeft.distance<=self.sensorRight.distance):
+                    self.engine.turnRight()
+                    self.engine.moveForward()
+                else:
+                    print "Strange case",self.sensorFront.distance,self.sensorLeft.distance,self.sensorRight.distance,self.sensorBack.distance
                     self.blocked=True
-        self.engine.stop()
+            else:
+                self.engine.moveForward()
+        print "Terminating program"
+        self.stop()
                     
+       
                 		    
 
-    def start(self):
+    def sensorTesting(self):
+        self.measure()
         print "Measuring distance"
-        print "Distance front= %f cm"%(self.sensorFront.measure())
+        print "Distance front= %f cm"%(self.sensorFront.distance)
         #self.engine.turnLeft()
-	time.sleep(0.1)
-        print "Distance left= %f cm"%(self.sensorLeft.measure())
+        time.sleep(0.1)
+        print "Distance left= %f cm"%(self.sensorLeft.distance)
+            #self.engine.turnLeft()
+    	time.sleep(0.1)
+        print "Distance right= %f cm"%(self.sensorRight.distance)
         #self.engine.turnLeft()
-	time.sleep(0.1)
-        print "Distance right= %f cm"%(self.sensorRight.measure())
+        time.sleep(0.1)
+        print "Distance back= %f cm"%(self.sensorBack.distance)
         #self.engine.turnLeft()
-	time.sleep(0.1)
-        print "Distance back= %f cm"%(self.sensorBack.measure())
-        #self.engine.turnLeft()
-	time.sleep(0.1)
-	print "Distance top = %f cm"%(self.sensorTop.measure())
+        time.sleep(0.1)
+        print "Distance top = %f cm"%(self.sensorTop.distance)
     
     
-    def checkSurrounding(self):
-        self.surrounding=[self.sensorFront.measure(),self.sensorLeft.measure(),self.sensorRight.measure(),self.sensorBack.measure(),self.sensorTop.measure()]
-    def escape(self,cutoff):
-        self.cutoff=cutoff
-        while (self.surrounding[0]<self.cutoff):
-            self.checkSurrounding()
-            print self.surrounding
-            print "Escaping mode activated"
-
+    
         
-        
-    def haltRobot(self):
-        print "Got the halt signal"
-        GPIO.remove_event_detect(self.signal)
-        self.stop()
+    
         
     def stop(self):
         print "Engine off and terminating program"
@@ -241,10 +244,11 @@ if __name__=="__main__":
     #rm2=atoi(sys.argv[6])
     #t=atof(sys.argv[7])
     #p=Robot(tr,ec,lm1,lm2,rm1,rm2,t)
+    dc=atof(sys.argv[1])
+    td=atof(sys.argv[2])
     GPIO.cleanup()
-    robot=Robot(7,8,11,12,15,16,21,22,23,24,29,31,33,35,1.7)
-    #robot.test()
+    robot=Robot(7,8,11,12,15,16,21,22,23,24,29,31,33,35,td,dc)
+    robot.sensorTesting()
     robot.go()
-    #robot.interactive()
     robot.stop()
     
