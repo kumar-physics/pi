@@ -29,6 +29,7 @@ class EchoSensor(object):
     def __init__(self,trigger,echo):
         self.trigger = trigger
         self.echo = echo
+	print "Sensor configured with t,e",self.trigger,self.echo
         GPIO.setup(self.trigger,GPIO.OUT)
         GPIO.setup(self.echo,GPIO.IN,pull_up_down = GPIO.PUD_DOWN)
         time.sleep(0.5)
@@ -66,6 +67,7 @@ class Motor(object):
         self.leftMotor=[lm1,lm2]
         self.rightMotor=[rm1,rm2]
         self.motors=self.leftMotor+self.rightMotor
+	print "Motor pins",self.motors
         GPIO.setup(self.motors,GPIO.OUT)
         
     def stop(self):
@@ -83,14 +85,14 @@ class Motor(object):
     def turnRight(self):
         print "Turning right"
         self.stop()
-        GPIO.output(self.motors,(1,1,0,0))
+        GPIO.output(self.motors,(1,0,0,1))
         time.sleep(self.turnDelay)
         self.stop()
         
     def turnLeft(self):
         print "Turning left"
         self.stop()
-        GPIO.output(self.motors,(0,0,1,1))
+        GPIO.output(self.motors,(0,1,1,0))
         time.sleep(self.turnDelay)
         self.stop()
         #self.moveForward()
@@ -106,11 +108,9 @@ class Robot(object):
         self.sensorRight=EchoSensor(tr,er)
         self.sensorBack=EchoSensor(tb,eb)
         self.sensorTop=EchoSensor(tt,et)
-        print "Front sensor configured (trigger pin %d,echo pin %d)"%(tr,ef)
+        #print "Front sensor configured (trigger pin %d,echo pin %d)"%(tr,ef)
         self.engine=Motor(lm1,lm2,rm1,rm2,t)
         print "Engine configured left motor pins=%d,%d right motor pins=%d,%d and turn delay=%f s"%(lm1,lm2,rm1,rm2,t)
-        self.sigOut=sigo
-        self.sigIn=sigi
     def test(self):
         self.engine.moveForward()
         self.allBlocked=False
@@ -135,6 +135,7 @@ class Robot(object):
         self.blockcount=0
         while self.blocked==False:
             self.checkSurrounding()
+	    print self.surrounding
             if self.surrounding[-1]<10.0:
                 self.blocked=True
             else:
@@ -142,11 +143,12 @@ class Robot(object):
                     self.engine.turnLeft()
                     self.checkSurrounding()
                     self.blockcount+=1
-                else:
+                elif (self.surrounding[0]<25.0 and (self.surrounding[1]<self.surrounding[2])):
                     self.engine.turnRight()
                     self.checkSurrounding()
                     self.blockcount+=1
-                if (self.surrounding[0]>=25.0):
+		else:
+                #if (self.surrounding[0]>=25.0):
                     self.engine.moveForward()
                     self.blockcount=0
                 if self.blockcount>4:
@@ -163,11 +165,13 @@ class Robot(object):
         print "Distance left= %f cm"%(self.sensorLeft.measure())
         #self.engine.turnLeft()
 	time.sleep(0.1)
-        print "Distance back= %f cm"%(self.sensorRight.measure())
+        print "Distance right= %f cm"%(self.sensorRight.measure())
         #self.engine.turnLeft()
 	time.sleep(0.1)
-        print "Distance right= %f cm"%(self.sensorBack.measure())
+        print "Distance back= %f cm"%(self.sensorBack.measure())
         #self.engine.turnLeft()
+	time.sleep(0.1)
+	print "Distance top = %f cm"%(self.sensorTop.measure())
     
     
     def checkSurrounding(self):
@@ -237,9 +241,10 @@ if __name__=="__main__":
     #rm2=atoi(sys.argv[6])
     #t=atof(sys.argv[7])
     #p=Robot(tr,ec,lm1,lm2,rm1,rm2,t)
-    #GPIO.cleanup()
-    robot=Robot(7,8,11,12,15,16,21,22,23,2429,31,33,35,1.0)
-    robot.test()
+    GPIO.cleanup()
+    robot=Robot(7,8,11,12,15,16,21,22,23,24,29,31,33,35,1.7)
+    #robot.test()
+    robot.go()
     #robot.interactive()
     robot.stop()
     
