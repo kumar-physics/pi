@@ -29,7 +29,7 @@ class EchoSensor(object):
     def __init__(self,trigger,echo):
         self.trigger = trigger
         self.echo = echo
-	print "Sensor configured with t,e",self.trigger,self.echo
+        #print "Sensor configured with t,e",self.trigger,self.echo
         GPIO.setup(self.trigger,GPIO.OUT)
         GPIO.setup(self.echo,GPIO.IN,pull_up_down = GPIO.PUD_DOWN)
         time.sleep(0.5)
@@ -63,36 +63,42 @@ class EchoSensor(object):
 class Motor(object):
     
     def __init__(self,lm1,lm2,rm1,rm2,t):
+        self.status="x"
         self.turnDelay=t
         self.leftMotor=[lm1,lm2]
         self.rightMotor=[rm1,rm2]
         self.motors=self.leftMotor+self.rightMotor
-	print "Motor pins",self.motors
         GPIO.setup(self.motors,GPIO.OUT)
+        self.stop()
+        
         
     def stop(self):
-        print "Stopping engine"
+        self.status="s"
         GPIO.output(self.motors,0)
         
     def moveForward(self):
-        print "Moving forward"
+        self.status="f"
+        #print "Moving forward"
         GPIO.output(self.motors,(1,0,1,0))
         
     def moveBackward(self):
-        print "Moving backward"
+        self.status="b"
+        #print "Moving backward"
         GPIO.output(self.motors,(0,1,0,1))
         
     def turnRight(self):
-        print "Turning right"
+        #print "Turning right"
         self.stop()
         GPIO.output(self.motors,(1,0,0,1))
+        self.status="r"
         time.sleep(self.turnDelay)
         self.stop()
         
     def turnLeft(self):
-        print "Turning left"
+        #print "Turning left"
         self.stop()
         GPIO.output(self.motors,(0,1,1,0))
+        self.status='l'
         time.sleep(self.turnDelay)
         self.stop()
         #self.moveForward()
@@ -100,9 +106,12 @@ class Motor(object):
     
 class Robot(object):
 
-    def __init__(self, tf,ef,tl,el,tr,er,tb,eb,tt,et,lm1,lm2,rm1,rm2,t,dc):
+    def __init__(self, tf,ef,tl,el,tr,er,tb,eb,tt,et,lm1,lm2,rm1,rm2,sig,t,dc):
         GPIO.setmode(GPIO.BOARD)
-        print "GPIO mode set as BOARD"
+        self.sig=sig
+        GPIO.setup(self.sig,GPIO.OUT)
+        GPIO.output(self.sig,1)
+        #print "GPIO mode set as BOARD"
         self.sensorFront=EchoSensor(tf,ef)
         self.sensorLeft=EchoSensor(tl,el)
         self.sensorRight=EchoSensor(tr,er)
@@ -111,7 +120,7 @@ class Robot(object):
         self.distanceCutoff=dc
         #print "Front sensor configured (trigger pin %d,echo pin %d)"%(tr,ef)
         self.engine=Motor(lm1,lm2,rm1,rm2,t)
-        print "Engine configured left motor pins=%d,%d right motor pins=%d,%d and turn delay=%f s"%(lm1,lm2,rm1,rm2,t)
+        #print "Engine configured left motor pins=%d,%d right motor pins=%d,%d and turn delay=%f s"%(lm1,lm2,rm1,rm2,t)
     def test(self):
         self.engine.moveForward()
         self.allBlocked=False
@@ -127,9 +136,7 @@ class Robot(object):
                             self.engine.turnLeft()
                             if self.sensorBack.measure()<self.distanceCutoff:
                                 self.allBlocked=True
-		
-	self.engine.stop()
-	
+        self.engine.stop()
     
     def measure(self):
         self.sensorFront.measure()
@@ -143,33 +150,48 @@ class Robot(object):
         while self.blocked==False:
             time.sleep(0.1)
             self.measure()
-            if self.sensorTop.distance<10.0: self.blocked=True
-            if ((self.sensorFront.distance<self.distanceCutoff and self.engine.motors==(1,0,1,0))or (self.sensorBack.distance<self.distanceCutoff and self.engine.motors==(0,1,0,1))):
-                #self.engine.stop()
-                if (self.sensorLeft.distance<self.distanceCutoff and self.sensorRight.distance<self.distanceCutoff and self.sensorBack.distance<self.distanceCutoff and self.engine.motors==(1,0,1,0)):
+            if self.sensorTop.distance < 10.0:
+                print "Interrupt received Stopping Robot"
+                self.blocked=True
+            if self.engine.status == 'f':
+                if self.sensorFront.distance < self.distanceCutoff :
                     self.engine.stop()
-                elif (self.sensorLeft.distance<self.distanceCutoff and self.sensorRight.distance<self.distanceCutoff and self.sensorFront.distance<self.distanceCutoff and self.engine.motors==(0,1,0,1)):
+                    if self.sensorLeft.distance > self.sensorRight.distance and self.sensorLeft.distance > self.distanceCutoff:
+                        self.engine.turnLeft()
+                        self.engine.moveForward()
+                    elif self.sensorLeft.distance < self.sensorRight.distance and self.sensorRight.distance > self.distanceCutoff:
+                        self.engine.turnRight()
+                        self.engine.moveForward()
+                    elif self.sensorBack.distance > self.distanceCutoff:
+                        self.engine.moveBackward()
+                    else:
+                        print "all sides blocked"
+                        self.engine.stop()
+            if self.engine.status == 'b':
+                if self.sensorBack.distance < self.distanceCutoff:
                     self.engine.stop()
-                elif (self.sensorLeft.distance<self.distanceCutoff and self.sensorRight.distance<self.distanceCutoff and self.sensorBack.distance>self.distanceCutoff):
-                    self.engine.moveBackward()
-                elif (self.sensorLeft.distance<self.distanceCutoff and self.sensorRight.distance<self.distanceCutoff and self.sensorFront.distance>self.distanceCutoff):
-                    self.engine.moveForward()
-                elif (self.sensorLeft.distance>self.sensorRight.distance):
-                    self.engine.turnLeft()
-                    self.engine.moveForward()
-                elif (self.sensorLeft.distance<=self.sensorRight.distance):
-                    self.engine.turnRight()
-                    self.engine.moveForward()
-                else:
-                    print "Strange case",self.sensorFront.distance,self.sensorLeft.distance,self.sensorRight.distance,self.sensorBack.distance
-                    self.blocked=True
-            else:
+                    if self.sensorLeft.distance > self.sensorRight.distance and self.sensorLeft.distance > self.distanceCutoff:
+                        self.engine.turnLeft()
+                        self.engine.moveForward()
+                    elif self.sensorLeft.distance < self.sensorRight.distance and self.sensorRight.distance > self.distanceCutoff:
+                        self.engine.turnRight()
+                        self.engine.moveForward()
+                    elif self.sensorFront.distance > self.distanceCutoff:
+                        self.engine.moveForward()()
+                    else:
+                        print "all sides blocked"
+                        self.engine.stop()
+            if self.engine.status == 's' and self.sensorFront.distance > self.distanceCutoff: 
                 self.engine.moveForward()
-        print "Terminating program"
-        self.stop()
-                    
-       
-                		    
+            if self.engine.status == 's' and self.sensorBack.distance > self.distanceCutoff:
+                self.engine.moveBackward()
+            if self.engine.status == 's' and self.sensorLeft.distance > self.distanceCutoff:
+                self.engine.turnLeft()
+                self.engine.moveForward()
+            if self.engine.status == "s" and self.sensorRight.distance > self.distanceCutoff:
+                self.engine.turnRight()
+                self.engine.moveForward()
+        self.stop()   
 
     def sensorTesting(self):
         self.measure()
@@ -179,7 +201,7 @@ class Robot(object):
         time.sleep(0.1)
         print "Distance left= %f cm"%(self.sensorLeft.distance)
             #self.engine.turnLeft()
-    	time.sleep(0.1)
+        time.sleep(0.1)
         print "Distance right= %f cm"%(self.sensorRight.distance)
         #self.engine.turnLeft()
         time.sleep(0.1)
@@ -196,6 +218,7 @@ class Robot(object):
     def stop(self):
         print "Engine off and terminating program"
         self.engine.stop()
+        GPIO.output(self.sig,0)
         GPIO.cleanup()
         
     def getch(self):
@@ -247,7 +270,7 @@ if __name__=="__main__":
     dc=atof(sys.argv[1])
     td=atof(sys.argv[2])
     GPIO.cleanup()
-    robot=Robot(7,8,11,12,15,16,21,22,23,24,29,31,33,35,td,dc)
+    robot=Robot(7,8,11,12,15,16,21,22,23,24,29,31,33,35,26,td,dc)
     robot.sensorTesting()
     robot.go()
     robot.stop()
