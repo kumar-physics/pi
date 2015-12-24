@@ -270,7 +270,7 @@ if __name__=="__main__":
     dc=atof(sys.argv[1])
     td=atof(sys.argv[2])
     GPIO.cleanup()
-    robot=Robot(7,8,11,12,15,16,21,22,23,24,29,31,33,35,26,td,dc)
+    robot=Robot(7,8,11,12,21,22,15,16,23,24,29,31,33,35,26,td,dc)
     robot.sensorTesting()
     robot.go()
     robot.stop()
