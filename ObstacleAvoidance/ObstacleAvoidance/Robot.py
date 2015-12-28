@@ -121,6 +121,35 @@ class Robot(object):
         #print "Front sensor configured (trigger pin %d,echo pin %d)"%(tr,ef)
         self.engine=Motor(lm1,lm2,rm1,rm2,t)
         #print "Engine configured left motor pins=%d,%d right motor pins=%d,%d and turn delay=%f s"%(lm1,lm2,rm1,rm2,t)
+    
+    def getch(self):
+        fd=sys.stdin.fileno()
+        old_settings=termios.tcgetattr(fd)
+        try:
+            tty.setraw(sys.stdin.fileno())
+            ch=sys.stdin.read(1)
+        finally:
+            termios.tcsetattr(fd,termios.TCSADRAIN, old_settings)
+        return ch
+    def manualMode(self):
+        while True:
+            ch=self.getch()
+            if ch=="w":
+                self.engine.moveForward()
+            if ch=="s":
+                self.engine.stop()
+            if ch=="a":
+                self.engine.turnLeft()
+                self.engine.moveForward()
+            if ch=="d":
+                self.engine.turnRight()
+                self.engine.moveForward()
+            if ch=="x":
+                self.engine.moveBackward()
+            if ch=="h":
+                self.stop()
+                print "Program Ended"
+            ch==""
     def test(self):
         self.engine.moveForward()
         self.allBlocked=False
@@ -269,9 +298,13 @@ if __name__=="__main__":
     #p=Robot(tr,ec,lm1,lm2,rm1,rm2,t)
     dc=atof(sys.argv[1])
     td=atof(sys.argv[2])
+    m=atoi(sys.argv[3])
     GPIO.cleanup()
     robot=Robot(7,8,15,16,21,22,11,12,23,24,29,31,33,35,26,td,dc)
     robot.sensorTesting()
-    robot.go()
-    robot.stop()
+    if m==0:
+        robot.go()
+        robot.stop()
+    else:
+        robot.manualMode()
     
