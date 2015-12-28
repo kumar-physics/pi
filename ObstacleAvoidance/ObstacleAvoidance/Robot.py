@@ -125,7 +125,7 @@ class Robot(object):
         self.engine.moveForward()
         self.allBlocked=False
         while self.allBlocked==False:
-            if self.sensorTop.measure()<10:
+            if self.sensorTop.measure()<5.0:
                 self.allBlocked=True
             else:
                 if self.sensorBack.measure()<self.distanceCutoff:
@@ -150,7 +150,7 @@ class Robot(object):
         while self.blocked==False:
             time.sleep(0.1)
             self.measure()
-            if self.sensorTop.distance < 10.0:
+            if self.sensorTop.distance < 5.0:
                 print "Interrupt received Stopping Robot"
                 self.blocked=True
             if self.engine.status == 'f':
@@ -270,7 +270,7 @@ if __name__=="__main__":
     dc=atof(sys.argv[1])
     td=atof(sys.argv[2])
     GPIO.cleanup()
-    robot=Robot(7,8,11,12,21,22,15,16,23,24,29,31,33,35,26,td,dc)
+    robot=Robot(7,8,15,16,21,22,11,12,23,24,29,31,33,35,26,td,dc)
     robot.sensorTesting()
     robot.go()
     robot.stop()
