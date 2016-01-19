@@ -1,5 +1,5 @@
 '''
-Created on Oct 29, 2015
+
 3.3V pin : 1,17
 5V pin : 2,4
 Ground : 6,9,14,20,25,30,34,39
@@ -88,19 +88,19 @@ class Motor(object):
         
     def turnRight(self):
         #print "Turning right"
-        self.stop()
+        #self.stop()
         GPIO.output(self.motors,(1,0,0,1))
         self.status="r"
-        time.sleep(self.turnDelay)
-        self.stop()
+        #time.sleep(self.turnDelay)
+        #self.stop()
         
     def turnLeft(self):
         #print "Turning left"
-        self.stop()
+        #self.stop()
         GPIO.output(self.motors,(0,1,1,0))
         self.status='l'
-        time.sleep(self.turnDelay)
-        self.stop()
+        #time.sleep(self.turnDelay)
+        #self.stop()
         #self.moveForward()
     
     
@@ -140,10 +140,10 @@ class Robot(object):
                 self.engine.stop()
             if ch=="a":
                 self.engine.turnLeft()
-                self.engine.moveForward()
+                #self.engine.moveForward()
             if ch=="d":
                 self.engine.turnRight()
-                self.engine.moveForward()
+                #self.engine.moveForward()
             if ch=="x":
                 self.engine.moveBackward()
             if ch=="h":
@@ -296,15 +296,15 @@ if __name__=="__main__":
     #rm2=atoi(sys.argv[6])
     #t=atof(sys.argv[7])
     #p=Robot(tr,ec,lm1,lm2,rm1,rm2,t)
-    dc=atof(sys.argv[1])
-    td=atof(sys.argv[2])
-    m=atoi(sys.argv[3])
-    GPIO.cleanup()
-    robot=Robot(7,8,15,16,21,22,11,12,23,24,29,31,33,35,26,td,dc)
-    robot.sensorTesting()
-    if m==0:
-        robot.go()
-        robot.stop()
-    else:
-        robot.manualMode()
+    #dc=atof(sys.argv[1])
+    #td=atof(sys.argv[2])
+    #m=atoi(sys.argv[3])
+    #GPIO.cleanup()
+    robot=Robot(7,8,15,16,21,22,11,12,23,24,29,31,33,35,26,1.5,25.0)
+    #robot.sensorTesting()
+    #if m==0:
+     #   robot.go()
+      #  robot.stop()
+    #else:
+    robot.manualMode()
     
