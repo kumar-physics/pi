@@ -37,7 +37,7 @@ except:
 traceback.print_exc()
 @author: kumaran
 '''
-#import RPi.GPIO as GPIO
+import RPi.GPIO as GPIO
 import time
 from string import atoi,atof
 import sys,socket
@@ -139,8 +139,9 @@ class RCRobot(object):
                     self.engine.turnLeft()
                 if self.sig==['f','r']:
                     self.engine.turnRight()
-                print self.sig
+                #print self.sig
                 self.sig=self.signal.getValue()
+		#print self.sig
     
 if __name__=="__main__":
     p=RCRobot(31,33,35,26)
