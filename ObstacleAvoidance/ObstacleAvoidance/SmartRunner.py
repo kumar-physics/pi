@@ -104,12 +104,11 @@ class Engine(object):
         else:
             self.BackSensor=False
             
-        self.stop()
       
     def Scan(self):
         if self.FronSensor and self.BackSensor:
-            self.FS.measure
-            self.BS.measure
+            self.FS.measure()
+            self.BS.measure()
     
     def Stop(self):
         self.status='s'
@@ -117,17 +116,16 @@ class Engine(object):
         
         
     def Run(self):
-        self.Scan
-        self.Move
+        self.Scan()
+        self.Move()
         while self.status != 's':
             if self.status == 'f' and self.FS.distance < self.DistanceCutoff:
-                self.Turn
+                self.Turn()
             elif self.status == 'r' and self.BS.distance < self.DistanceCutoff:
-                self.Turn
+                self.Turn()
             else:
                 pass
-            time.sleep(0.5)
-            self.Scan
+            self.Scan()
         GPIO.cleanup()
         print 'No way to go.. stopping....'
         
@@ -137,39 +135,40 @@ class Engine(object):
         self.Scan
         if self.FS.distance > self.BS.distance and self.FS.distance > self.DistanceCutoff:
             self.status='f'
-            GPIO.output(self.motors,(1,0,1,0))
+            GPIO.output(self.motors,(1,0,0,1))
         elif self.FS.distance < self.BS.distance and self.BS.distance > self.DistanceCutoff:
             self.status='r'
-            GPIO.output(self.motors,(0,1,0,1))
+            GPIO.output(self.motors,(0,1,1,0))
         elif self.FS.distance < self.DistanceCutoff and self.BS.distance < self.DistanceCutoff:
-            self.Stop
+            self.Stop()
         else:
-            self.Turn
+            self.Turn()
             
         
     def Turn(self):
-        if random.choice(['L','R'])=='L':
+        if random.choice(['L','R'])=='R':
             if self.status == 'f':
                 GPIO.output(self.motors,(0,1,0,0))
                 time.sleep(self.turnDelay)
-                self.Move
+                self.Move()
             else:
                 GPIO.output(self.motors,(1,0,0,0))
                 time.sleep(self.turnDelay)
-                self.Move  
+                self.Move()  
         else:
-            if self.status == 'f':
-                GPIO.output(self.motors,(0,0,1,0))
-                time.sleep(self.turnDelay)
-                self.Move
-            else:
+            if self.status == 'r':
                 GPIO.output(self.motors,(0,0,0,1))
                 time.sleep(self.turnDelay)
-                self.Move  
+                self.Move()
+            else:
+                GPIO.output(self.motors,(0,0,1,0))
+                time.sleep(self.turnDelay)
+                self.Move()  
             
         #print "Moving forward"
         
 if __name__=="__main__":
-    Neo=Engine(29,31,33,35,1.5,10.0,7,8,11,12)
-    Neo.Run
-    
+    GPIO.setmode(GPIO.BOARD)
+    Neo=Engine(29,31,33,35,0.5,10.0,22,21,24,23)
+    Neo.Run()
+
