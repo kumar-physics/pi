@@ -46,7 +46,7 @@ import RPi.GPIO as GPIO
 import time
 from string import atoi,atof
 import sys,tty,termios
-import getch
+#import getch
 import random
 
 
@@ -201,10 +201,21 @@ class Engine(object):
             if ch=="h":
                 self.Stop()
                 print "Program Ended"
-            ch==""    
+            ch==""  
+    def Run(self):
+        self.Scan()
+        self.Move()
+        while self.status != 's':
+            if self.status == 'f' and self.FS.distance < self.DistanceCutoff:
+                self.Turn()
+            else:
+                pass
+            self.Scan()
+        GPIO.cleanup()
+        print 'No way to go.. stopping....'  
         
 if __name__=="__main__":
     GPIO.setmode(GPIO.BOARD)
-    Neo=Engine(29,31,33,35,0.5,10.0,22,21,24,23)
+    Neo=Engine(29,31,33,35,0.5,10.0,22,21,0,0)
     Neo.Run()
 
