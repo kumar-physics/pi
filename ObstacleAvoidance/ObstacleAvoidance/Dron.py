@@ -49,6 +49,34 @@ import sys,tty,termios
 #import getch
 import random
 
+class RCInterface(object):
+    
+    def __init__(self):
+        self.host=''
+        self.port=5555
+        self.sock=socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
+        self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_BROADCAST, 1)
+        self.sock.bind((self.host, self.port))
+        
+    def getValue(self):
+        self.msg,self.addr=self.sock.recvfrom(8192)
+        self.acc=self.msg.split(",")[2:5]
+        self.val=['x','x']
+        if abs(atof(self.acc[2]))<8:
+            self.val[0]="f"
+        else:
+            self.val[0]='s'
+        if atof(self.acc[1])<-2:
+            self.val[1]='l'
+        elif atof(self.acc[1])>2:
+            self.val[1]='r'
+        elif atof(self.acc[2])<-5:
+            self.val=['s','s']
+        else:
+            self.val[1]='f'
+        return self.val
+        
+
 
 class EchoSensor(object):
     
@@ -92,6 +120,7 @@ class Engine(object):
         self.rightMotor=[rm1,rm2]
         self.motors=self.leftMotor+self.rightMotor
         self.DistanceCutoff=dc
+        self.signal=RCInterface()
         GPIO.setup(self.motors,GPIO.OUT)
         if ft and fc:
             self.FronSensor=True
@@ -119,15 +148,11 @@ class Engine(object):
         
     def Run(self):
         #self.Scan()
-        self.Move()
-        while self.status != 's':
-            if self.status == 'f' and self.FS.distance < self.DistanceCutoff:
-                self.Turn()
-            elif self.status == 'r' and self.BS.distance < self.DistanceCutoff:
-                self.Turn()
-            else:
-                pass
-            self.Scan()
+        self.sig = self.signal.getValue()
+        while self.sig != ['s','s']:
+            self.sig=self.signal.getValue()
+            self.Move()
+            
         GPIO.cleanup()
         print 'No way to go.. stopping....'
         
@@ -152,13 +177,18 @@ class Engine(object):
         if self.FS.distance > self.DistanceCutoff:
             self.status='f'
             GPIO.output(self.motors,(1,0,0,1))
+        elif self.sig[1]=='l':
+            self.Left()
+        elif self.sig[1]=='r':
+            self.Right()
         else:
-            if self.status=="f":
-                self.Turn()
-            elif self.status=='l':
-                self.Left()
-            else:
-                self.Right()
+            self.Stop()
+#             if self.status=="f":
+#                 self.Turn()
+#             elif self.status=='l':
+#                 self.Left()
+#             else:
+#                 self.Right()
     
     def Reverse(self):
         self.status = 'r'
@@ -202,17 +232,17 @@ class Engine(object):
                 self.Stop()
                 print "Program Ended"
             ch==""  
-    def Run(self):
-        self.Scan()
-        self.Move()
-        while self.status != 's':
-            if self.status == 'f' and self.FS.distance < self.DistanceCutoff:
-                self.Turn()
-            else:
-                pass
-            self.Scan()
-        GPIO.cleanup()
-        print 'No way to go.. stopping....'  
+#     def Run(self):
+#         self.Scan()
+#         self.Move()
+#         while self.status != 's':
+#             if self.status == 'f' and self.FS.distance < self.DistanceCutoff:
+#                 self.Turn()
+#             else:
+#                 pass
+#             self.Scan()
+#         GPIO.cleanup()
+#         print 'No way to go.. stopping....'  
         
 if __name__=="__main__":
     GPIO.setmode(GPIO.BOARD)
