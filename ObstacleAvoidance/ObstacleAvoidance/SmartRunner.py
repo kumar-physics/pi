@@ -46,7 +46,7 @@ import RPi.GPIO as GPIO
 import time
 from string import atoi,atof
 import sys,tty,termios
-import getch
+#import getch
 import random
 
 
