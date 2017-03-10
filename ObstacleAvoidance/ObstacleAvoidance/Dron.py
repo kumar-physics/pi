@@ -150,9 +150,24 @@ class Engine(object):
         #self.Scan()
         self.sig = self.signal.getValue()
         while self.sig != ['s','s']:
+            self.Scan()
+            if self.FS.distance < self.DistanceCutoff:
+                self.Stop()
+            else:
+                if self.sig[1]=='f':
+                    self.status='f'
+                    GPIO.output(self.motors,(1,0,0,1))
+                elif self.sig[1]=="l":
+                    self.status='l'
+                    GPIO.output(self.motors,(1,0,0,0))
+                elif self.sig[1]=='r':
+                    self.status='r'
+                    GPIO.output(self.motors,(0,0,0,1))
+                else:
+                    self.Stop()
             self.sig=self.signal.getValue()
-            self.Move()
-            
+
+        self.stop()    
         GPIO.cleanup()
         print 'No way to go.. stopping....'
         
