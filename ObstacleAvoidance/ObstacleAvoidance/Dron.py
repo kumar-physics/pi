@@ -48,7 +48,7 @@ from string import atoi,atof
 import sys,tty,termios
 #import getch
 import random
-
+import socket
 class RCInterface(object):
     
     def __init__(self):
@@ -120,6 +120,7 @@ class Engine(object):
         self.rightMotor=[rm1,rm2]
         self.motors=self.leftMotor+self.rightMotor
         self.DistanceCutoff=dc
+	self.DepthCutoff=100.00
         self.signal=RCInterface()
         GPIO.setup(self.motors,GPIO.OUT)
         if ft and fc:
@@ -151,23 +152,32 @@ class Engine(object):
         self.sig = self.signal.getValue()
         while self.sig != ['s','s']:
             self.Scan()
-            if self.FS.distance < self.DistanceCutoff:
+	    print self.FS.distance,self.BS.distance
+            if self.FS.distance < self.DistanceCutoff or self.BS.distance > self.DepthCutoff:
                 self.Stop()
+                if self.sig[1]=="l":
+                    self.status='l'
+                    GPIO.output(self.motors,(0,0,1,0))
+                elif self.sig[1]=='r':
+                    self.status='r'
+                    GPIO.output(self.motors,(0,1,0,0))
+		else:
+		    pass				   		
             else:
                 if self.sig[1]=='f':
                     self.status='f'
-                    GPIO.output(self.motors,(1,0,0,1))
+                    GPIO.output(self.motors,(0,1,1,0))
                 elif self.sig[1]=="l":
                     self.status='l'
-                    GPIO.output(self.motors,(1,0,0,0))
+                    GPIO.output(self.motors,(0,0,1,0))
                 elif self.sig[1]=='r':
                     self.status='r'
-                    GPIO.output(self.motors,(0,0,0,1))
+                    GPIO.output(self.motors,(0,1,0,0))
                 else:
                     self.Stop()
             self.sig=self.signal.getValue()
 
-        self.stop()    
+        self.Stop()    
         GPIO.cleanup()
         print 'No way to go.. stopping....'
         
@@ -261,6 +271,6 @@ class Engine(object):
         
 if __name__=="__main__":
     GPIO.setmode(GPIO.BOARD)
-    Neo=Engine(29,31,33,35,0.5,10.0,22,21,0,0)
+    Neo=Engine(29,31,33,35,0.5,20.0,22,21,24,23)
     Neo.Run()
 
