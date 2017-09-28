@@ -143,8 +143,10 @@ class Engine(object):
             self.turns = 0
         elif self.status == "f" and self.FS.distance<self.DistanceCutoff:
             self.Stop()
+            self.Turn()
         elif self.status == "r" and self.BS.distance<self.DistanceCutoff:
             self.Stop()
+            self.Turn()
         else:
             self.turns+=1
             self.Turn()
