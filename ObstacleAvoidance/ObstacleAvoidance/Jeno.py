@@ -114,7 +114,9 @@ class Engine(object):
             elif self.status == 'f':
                 self.FS.measure()
             elif self.status == 'r':
-                self.BS.measure() 
+                self.BS.measure()
+        else:
+            print "Problem with Echo sensors" 
             
     
     def Stop(self):
@@ -135,17 +137,20 @@ class Engine(object):
         
     
     def Move(self):
-        if self.status in ["s","x","t"] and self.FS.distance > self.DistanceCutoff and self.BS.distance > self.DistanceCutoff :
+        if self.status in ["s","x","t"] and self.FS.distance > self.DistanceCutoff:
             self.MoveForward()
-            self.turns = 0
+            self.turns=0
+        #elif self.status in ["s","x","t"] and self.FS.distance > self.DistanceCutoff and self.BS.distance > self.DistanceCutoff :
+        #    self.MoveForward()
+        #    self.turns = 0
         elif self.status in ["s","x","t"] and self.BS.distance > self.DistanceCutoff:
             self.MoveBackward()
             self.turns = 0
         elif self.status == "f" and self.FS.distance<self.DistanceCutoff:
-            self.Stop()
+            #self.Stop()
             self.Turn()
         elif self.status == "r" and self.BS.distance<self.DistanceCutoff:
-            self.Stop()
+            #self.Stop()
             self.Turn()
         else:
             self.turns+=1
@@ -161,6 +166,7 @@ class Engine(object):
                 
         
     def Turn(self):
+        self.status = 't'
         if random.choice(['L','R'])=='R':
             GPIO.output(self.motors,(0,1,0,1))
             time.sleep(random.choice(self.turnDelay))
