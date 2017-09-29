@@ -127,7 +127,7 @@ class Engine(object):
     def Run(self):
         self.turns=0
         while self.status != 'h':
-            time.sleep(0.001)
+            time.sleep(0.01)
             self.Scan()
             if self.status in ["s","x","t","f"] and self.FS.distance > self.DistanceCutoff:
                 self.MoveForward()
