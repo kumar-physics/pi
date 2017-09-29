@@ -204,6 +204,6 @@ class Engine(object):
         
 if __name__=="__main__":
     GPIO.setmode(GPIO.BOARD)
-    Neo=Engine(29,31,33,35,0.5,10.0,22,21,24,23)
+    Neo=Engine(29,31,33,35,0.5,15.0,22,21,24,23)
     Neo.Run()
 
