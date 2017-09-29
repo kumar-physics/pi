@@ -138,26 +138,16 @@ class Engine(object):
     
     def Move(self):
         if self.status in ["s","x","t","f"] and self.FS.distance > self.DistanceCutoff:
-                self.MoveForward()
-                print self.status,self.DistanceCutoff,self.FS.distance,self.BS.distance,"Moving forward"
-                self.turns=0
-        #elif self.status in ["s","x","t"] and self.FS.distance > self.DistanceCutoff and self.BS.distance > self.DistanceCutoff :
-        #    self.MoveForward()
-        #    self.turns = 0
+            self.MoveForward()
+            self.turns=0
         elif self.status in ["s","x","t","r"] and self.BS.distance > self.DistanceCutoff:
             self.MoveBackward()
-            print self.status,self.DistanceCutoff,self.FS.distance,self.BS.distance,"Moving backward"
             self.turns = 0
         elif self.status == "f" and self.FS.distance < self.DistanceCutoff:
-            #self.Stop()
-            print self.status,self.DistanceCutoff,self.FS.distance,self.BS.distance,"Turning"
             self.Turn()
         elif self.status == "r" and self.BS.distance < self.DistanceCutoff:
-            #self.Stop()
-            print self.status,self.DistanceCutoff,self.FS.distance,self.BS.distance,"Turning"
             self.Turn()
         else:
-            print self.status,self.DistanceCutoff,self.FS.distance,self.BS.distance,"Again Turning"
             self.turns+=1
             self.Turn()
         if self.turns > self.Maxturns:
@@ -181,7 +171,6 @@ class Engine(object):
             time.sleep(random.choice(self.turnDelay))
             self.Stop()
        
-        #print "Moving forward"
         
 if __name__=="__main__":
     GPIO.setmode(GPIO.BOARD)
