@@ -128,22 +128,22 @@ class Engine(object):
         self.turns=0
         while self.status != 'h':
             self.Scan()
-            if self.status in ["s","x","t"] and self.FS.distance > self.DistanceCutoff:
+            if self.status in ["s","x","t","f"] and self.FS.distance > self.DistanceCutoff:
                 self.MoveForward()
                 print self.status,self.DistanceCutoff,self.FS.distance,self.BS.distance,"Moving forward"
                 self.turns=0
         #elif self.status in ["s","x","t"] and self.FS.distance > self.DistanceCutoff and self.BS.distance > self.DistanceCutoff :
         #    self.MoveForward()
         #    self.turns = 0
-            elif self.status in ["s","x","t"] and self.BS.distance > self.DistanceCutoff:
+            elif self.status in ["s","x","t","r"] and self.BS.distance > self.DistanceCutoff:
                 self.MoveBackward()
                 print self.status,self.DistanceCutoff,self.FS.distance,self.BS.distance,"Moving backward"
                 self.turns = 0
-            elif self.status == "f" and self.FS.distance<self.DistanceCutoff:
+            elif self.status == "f" and self.FS.distance < self.DistanceCutoff:
             #self.Stop()
                 print self.status,self.DistanceCutoff,self.FS.distance,self.BS.distance,"Turning"
                 self.Turn()
-            elif self.status == "r" and self.BS.distance<self.DistanceCutoff:
+            elif self.status == "r" and self.BS.distance < self.DistanceCutoff:
             #self.Stop()
                 print self.status,self.DistanceCutoff,self.FS.distance,self.BS.distance,"Turning"
                 self.Turn()
