@@ -137,6 +137,7 @@ class Engine(object):
         
     
     def Move(self):
+	self.Scan()
         if self.status in ["s","x","t"] and self.FS.distance > self.DistanceCutoff:
             self.MoveForward()
             self.turns=0
@@ -153,20 +154,20 @@ class Engine(object):
             #self.Stop()
             self.Turn()
         else:
+	    print self.status,"probllem"
             self.turns+=1
             self.Turn()
             
             
     def MoveForward(self):
         self.status = 'f'
-        GPIO.output(self.motors,(1,0,0,1))
+        GPIO.output(self.motors,(0,1,1,0))
     def MoveBackward(self):
         self.status = 'r'
-        GPIO.output(self.motors,(0,1,1,0))
+        GPIO.output(self.motors,(1,0,0,1))
                 
         
     def Turn(self):
-        self.status = 't'
         if random.choice(['L','R'])=='R':
             GPIO.output(self.motors,(0,1,0,1))
             time.sleep(random.choice(self.turnDelay))

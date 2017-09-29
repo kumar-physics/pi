@@ -94,7 +94,7 @@ class Engine(object):
         self.rightMotor=[rm1,rm2]
         self.motors=self.leftMotor+self.rightMotor
         self.DistanceCutoff=dc
-        self.DepthCutoff=100.00
+        self.DepthCutoff=3000.00
         GPIO.setup(self.motors,GPIO.OUT)
         if ft and fc:
             self.FronSensor=True
@@ -121,22 +121,25 @@ class Engine(object):
       
     def RandomTurn(self):
         direction = random.choice(['L','R'])
-        turndelay = random.choice([0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0,1.1,1.2,1.3,1.4,1.5,1.6,1.7,1.8,1.9,2.0,2.1,2.2,2.3,2.4,2.5])
+        turndelay = random.choice([0.3,0.4,0.5,0.6,0.7,0.8])#,0.9,1.0,1.1,1.2,1.3,1.4,1.5,1.6,1.7,1.8,1.9,2.0,2.1,2.2,2.3,2.4,2.5])
         if direction == "L":
             self.status = 'l'
-            GPIO.output(self.motors,(0,0,1,0))
+            GPIO.output(self.motors,(1,0,1,0))
             time.sleep(turndelay)
             self.Stop()
         else:
             self.status = 'r'
-            GPIO.output(self.motors,(0,1,0,0))
+            GPIO.output(self.motors,(0,1,0,1))
             time.sleep(turndelay)
             self.Stop()
     def RandomRun(self):
         blockCount=0
-        while (blcokCount<5):
+	self.status='f'
+        while (blockCount<5):
+	    print self.status
             self.Scan()
-            if self.FS.distance < self.DepthCutoff or self.BS.distance > self.DepthCutoff:
+	    print self.FS.distance,self.BS.distance
+            if self.FS.distance < self.DistanceCutoff or self.BS.distance > self.DepthCutoff:
                 self.Stop()
             else:
                 blockCount=0
@@ -151,6 +154,6 @@ class Engine(object):
   
 if __name__=="__main__":
     GPIO.setmode(GPIO.BOARD)
-    Neo=Engine(29,31,33,35,0.5,20.0,22,21,24,23)
+    Neo=Engine(29,31,33,35,0.5,30.0,22,21,24,23)
     Neo.RandomRun()
 
