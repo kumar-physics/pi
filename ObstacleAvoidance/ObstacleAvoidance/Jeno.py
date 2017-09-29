@@ -46,7 +46,7 @@ import RPi.GPIO as GPIO
 import time
 from string import atoi,atof
 import sys,tty,termios
-#import getch
+import getch
 import random
 
 
@@ -127,6 +127,7 @@ class Engine(object):
     def Run(self):
         self.turns=0
         while self.status != 'h':
+            self.ch=getch.getch()
             time.sleep(0.01)
             self.Scan()
             self.Move()
@@ -150,7 +151,7 @@ class Engine(object):
         else:
             self.turns+=1
             self.Turn()
-        if self.turns > self.Maxturns:
+        if self.turns > self.Maxturns or self.ch == "h":
             self.status = 'h'
             
     def MoveForward(self):
