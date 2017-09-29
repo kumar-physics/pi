@@ -128,7 +128,29 @@ class Engine(object):
         self.turns=0
         while self.status != 'h':
             self.Scan()
-            self.Move()
+            if self.status in ["s","x","t"] and self.FS.distance > self.DistanceCutoff:
+                self.MoveForward()
+                print "Moving forward"
+                self.turns=0
+        #elif self.status in ["s","x","t"] and self.FS.distance > self.DistanceCutoff and self.BS.distance > self.DistanceCutoff :
+        #    self.MoveForward()
+        #    self.turns = 0
+            elif self.status in ["s","x","t"] and self.BS.distance > self.DistanceCutoff:
+                self.MoveBackward()
+                print "Moving backward"
+                self.turns = 0
+            elif self.status == "f" and self.FS.distance<self.DistanceCutoff:
+            #self.Stop()
+                print "Turning"
+                self.Turn()
+            elif self.status == "r" and self.BS.distance<self.DistanceCutoff:
+            #self.Stop()
+                print "Turning"
+                self.Turn()
+            else:
+                print "Again Turning"
+                self.turns+=1
+                self.Turn()
             if self.turns > self.Maxturns:
                 self.status = 'h'
         self.Stop()
