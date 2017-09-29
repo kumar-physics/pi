@@ -127,7 +127,6 @@ class Engine(object):
     def Run(self):
         self.turns=0
         while self.status != 'h':
-            self.ch=getch.getch()
             time.sleep(0.01)
             self.Scan()
             self.Move()
