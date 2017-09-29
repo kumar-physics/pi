@@ -46,7 +46,7 @@ import RPi.GPIO as GPIO
 import time
 from string import atoi,atof
 import sys,tty,termios
-import msvcrt
+
 import random
 
 
@@ -153,9 +153,7 @@ class Engine(object):
             self.Turn()
         if self.turns > self.Maxturns:
             self.status = 'h'
-        if msvcrt.kbhit():
-            if ord(msvcrt.getch()) == 27:
-                self.status = 'h'
+        
             
     def MoveForward(self):
         self.status = 'f'
