@@ -94,10 +94,10 @@ class Engine(object):
         self.DistanceCutoff=dc
         self.Maxturns = 5
         GPIO.setup(self.motors,GPIO.OUT)
-        self.mp1 = GPIO.PMW(lm1,2.0)
-        self.mn1 = GPIO.PMW(lm2,2.0)
-        self.mp2 = GPIO.PMW(rm1,2.0)
-        self.mn2 = GPIO.PMW(rm2,2.0)
+        self.mp1 = GPIO.PWM(lm1,100)
+        self.mn1 = GPIO.PWM(lm2,100)
+        self.mp2 = GPIO.PWM(rm1,100)
+        self.mn2 = GPIO.PWM(rm2,100)
         
         
         if ft and fc:
