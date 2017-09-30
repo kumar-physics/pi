@@ -94,6 +94,12 @@ class Engine(object):
         self.DistanceCutoff=dc
         self.Maxturns = 5
         GPIO.setup(self.motors,GPIO.OUT)
+        self.mp1 = GPIO.PMW(lm1,2.0)
+        self.mn1 = GPIO.PMW(lm2,2.0)
+        self.mp2 = GPIO.PMW(rm1,2.0)
+        self.mn2 = GPIO.PMW(rm2,2.0)
+        
+        
         if ft and fc:
             self.FronSensor=True
             self.FS=EchoSensor(ft,fc)
@@ -122,10 +128,18 @@ class Engine(object):
     def Stop(self):
         self.status='s'
         GPIO.output(self.motors,0)
+        self.mp1.ChangeDutyCycle(0)
+        self.mn1.ChangeDutyCycle(0)
+        self.mp2.ChangeDutyCycle(0)
+        self.mn2.ChangeDutyCycle(0)
         
         
     def Run(self):
         self.turns=0
+        self.mp1.start(0)
+        self.mn1.start(0)
+        self.mp2.start(0)
+        self.mn2.start(0)
         while self.status != 'h':
             
             time.sleep(0.01)
@@ -134,6 +148,10 @@ class Engine(object):
             self.Move()
             
         self.Stop()
+        self.mp1.stop()
+        self.mn1.stop()
+        self.mp2.stop()
+        self.mn2.stop()
         GPIO.cleanup()
         print 'No way to go.. stopping....'
         
@@ -158,19 +176,40 @@ class Engine(object):
             
     def MoveForward(self):
         self.status = 'f'
-        GPIO.output(self.motors,(0,1,1,0))
+        dc = (self.FS.distance/100.00)*100.00
+        if dc>100.00: dc = 100
+        self.mp1.ChangeDutyCycle(0)
+        self.mn1.ChangeDutyCycle(dc)
+        self.mp2.ChangeDutyCycle(dc)
+        self.mn2.ChangeDutyCycle(0)
+        #GPIO.output(self.motors,(0,1,1,0))
     def MoveBackward(self):
         self.status = 'r'
-        GPIO.output(self.motors,(1,0,0,1))
+        dc = (self.BS.distance/100.00)*100.00
+        if dc>100.00: dc = 100
+        self.mp1.ChangeDutyCycle(dc)
+        self.mn1.ChangeDutyCycle(0)
+        self.mp2.ChangeDutyCycle(0)
+        self.mn2.ChangeDutyCycle(dc)
+        #GPIO.output(self.motors,(1,0,0,1))
                 
         
     def Turn(self):
         if random.choice(['L','R'])=='R':
-            GPIO.output(self.motors,(0,1,0,1))
+            #GPIO.output(self.motors,(0,1,0,1))
+        
+            self.mp1.ChangeDutyCycle(0)
+            self.mn1.ChangeDutyCycle(50)
+            self.mp2.ChangeDutyCycle(0)
+            self.mn2.ChangeDutyCycle(50)
             time.sleep(random.choice(self.turnDelay))
             self.Stop()
         else:
-            GPIO.output(self.motors,(1,0,1,0))
+            #GPIO.output(self.motors,(1,0,1,0))
+            self.mp1.ChangeDutyCycle(50)
+            self.mn1.ChangeDutyCycle(0)
+            self.mp2.ChangeDutyCycle(50)
+            self.mn2.ChangeDutyCycle(0)
             time.sleep(random.choice(self.turnDelay))
             self.Stop()
        
