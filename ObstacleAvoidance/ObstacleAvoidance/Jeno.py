@@ -127,6 +127,7 @@ class Engine(object):
     def Run(self):
         self.turns=0
         while self.status != 'h':
+            print self.status,self.FS.distance,self.BS.distance
             time.sleep(0.01)
             self.Scan()
             self.Move()
