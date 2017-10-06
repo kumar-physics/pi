@@ -130,6 +130,7 @@ class Engine(object):
             time.sleep(0.01)
             self.Scan()
             self.Move()
+	    print self.status,self.FS.distance,self.BS.distance
             
         self.Stop()
         GPIO.cleanup()
@@ -164,17 +165,17 @@ class Engine(object):
         
     def Turn(self):
         if random.choice(['L','R'])=='R':
-            GPIO.output(self.motors,(0,1,0,1))
+            GPIO.output(self.motors,(0,0,0,1))
             time.sleep(random.choice(self.turnDelay))
             self.Stop()
         else:
-            GPIO.output(self.motors,(1,0,1,0))
+            GPIO.output(self.motors,(1,0,0,0))
             time.sleep(random.choice(self.turnDelay))
             self.Stop()
        
         
 if __name__=="__main__":
     GPIO.setmode(GPIO.BOARD)
-    Neo=Engine(29,31,33,35,0.5,15.0,22,21,24,23)
+    Neo=Engine(29,31,33,35,0.5,30.0,22,21,24,23)
     Neo.Run()
 
