@@ -130,7 +130,7 @@ class Engine(object):
             time.sleep(0.01)
             self.Scan()
             self.Move()
-	    print self.status,self.FS.distance,self.BS.distance
+	    #print self.status,self.FS.distance,self.BS.distance
             
         self.Stop()
         GPIO.cleanup()
