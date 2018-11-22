@@ -11,7 +11,10 @@ class Jeeno:
 
     def move(self):
         self.front_sensor.when_out_of_range = self.robot.forward
-        self.front_sensor.when_in_range = self.robot.stop
+        self.front_sensor.when_in_range = self.turn
+
+    def turn(self):
+        self.robot.stop()
         if choice(['L','R']) == 'L':
             self.left()
         else:
