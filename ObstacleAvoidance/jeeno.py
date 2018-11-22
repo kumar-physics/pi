@@ -5,17 +5,24 @@ class Jeeno:
 
     def __init__(self):
         self.front_sensor = DistanceSensor(echo = , trigger = )
-        self.back_sensor = DistanceSensor(echo = , trigger = )
-        self.robot = Robot(left=(,), right=(,))
+        #self.back_sensor = DistanceSensor(echo = , trigger = )
+        self.robot = Robot(left=(6,12), right=(5,13))
 
 
     def move(self):
         self.front_sensor.when_out_of_range = self.robot.forward()
         self.front_sensor.when_in_range = self.robot.stop()
         if choice(['L','R']) == 'L':
-            self.robot.left()
+            self.left()
         else:
-            self.robot.right()
+            self.right()
+
+    def left(self):
+        self.robot.forward(curve_left=1)
+    def right(self):
+        self.robot.forward(curve_right=1)
+
+
 if __name__ == "__main__":
     j = Jeeno()
     j.move()
