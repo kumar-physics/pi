@@ -4,7 +4,7 @@ from random import choice
 class Jeeno:
 
     def __init__(self):
-        self.front_sensor = DistanceSensor(echo = , trigger = )
+        self.front_sensor = DistanceSensor(echo = 22, trigger = 27)
         #self.back_sensor = DistanceSensor(echo = , trigger = )
         self.robot = Robot(left=(6,12), right=(5,13))
 
